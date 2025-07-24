@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WSP ChatBot</title>
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" 
+  />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(to right, #f8f9fa, #e0eafc);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding-top: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #343a40;
+      margin-bottom: 30px;
+    }
+
+    .container {
+      max-width: 600px;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-control {
+      border: 2px solid #6c63ff;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #6c63ff, #42a5f5);
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(108, 99, 255, 0.3);
+      transition: background 0.3s;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #5a54d4, #2196f3);
+    }
+
+    #response {
+      margin-top: 25px;
+      padding: 20px;
+      min-height: 80px;
+      border-radius: 10px;
+      background-color: #f1f3f8;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+      font-size: 16px;
+    }
+
+    #response h3 {
+      color: #333;
+      font-size: 1.3em;
+    }
+
+    #response strong {
+      color: #5a54d4;
+    }
+
+    #response ul {
+      padding-left: 20px;
+    }
+
+    #response li {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Free ChatBot</h2>
+    <div class="form-group">
+      <input
+        type="text"
+        class="form-control"
+        id="userInput"
+        placeholder="Enter your question" />
+    </div>
+    <button class="btn btn-success" onclick="sendMessage()">Ask!</button>
+    <div id="response"></div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput').value;
+      const responseDiv = document.getElementById('response');
+
+      if (!input) {
+        responseDiv.innerHTML = "❗ Please enter a message.";
+        return;
+      }
+
+      responseDiv.innerHTML = "⏳ Loading...";
+
+      try {
+        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer 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',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'deepseek/deepseek-chat',
+            messages: [
+              {
+                role: 'user',
+                content: input
+              }
+            ]
+          })
+        });
+
+        const data = await response.json();
+        const markdownText = data.choices?.[0]?.message?.content || 'No response received.';
+        responseDiv.innerHTML = marked.parse(markdownText);
+
+      } catch (error) {
+        responseDiv.innerHTML = '❌ Error: ' + error.message;
+      }
+    }
+  </script>
+</body>
+</html>
